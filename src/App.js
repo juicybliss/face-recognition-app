@@ -34,24 +34,30 @@ class App extends Component {
       box: {},
       route: 'signin',
       isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: ''
-      }
+      // user: {
+      //   id: '',
+      //   name: '',
+      //   email: '',
+      //   entries: 0,
+      //   joined: ''
+      // }
     }
   }
 
-  loadUser = (data) => {
-    this.setState({user: {
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      entries: data.entries,
-      joined: data.joined
-    }})
+  // loadUser = (data) => {
+  //   this.setState({user: {
+  //     id: data.id,
+  //     name: data.name,
+  //     email: data.email,
+  //     entries: data.entries,
+  //     joined: data.joined
+  //   }})
+  // }
+
+  componentDidMount() {
+    fetch('http://localhost:3000')
+    .then(response => response.json())
+    .then(console.log)
   }
 
   calculateFaceLocation = (data) => {
