@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
+import Clarifai from 'clarifai';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Navigation from './components/Navigation/Navigation';
 import Signin from './components/Signin/Signin';
@@ -8,9 +9,12 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import './App.css';
- 
+
+const app = new Clarifai.App({
+  apiKey: '0795ddaed65f4f6c8e8d12fb1421ca1d'
+})
+
 const particlesOptions = {
-  //customize this to your liking
   particles: {
     number: {
       value: 30,
@@ -36,7 +40,6 @@ const initialState = {
     joined: ''
   }
 }
-
 class App extends Component {
   constructor() {
     super();
@@ -52,6 +55,12 @@ class App extends Component {
       joined: data.joined
     }})
   }
+
+  // componentDidMount() {
+  //   fetch('http://localhost:3000')
+  //   .then(response => response.json())
+  //   .then(console.log)
+  // }
 
   calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -71,39 +80,38 @@ class App extends Component {
   }
 
   onInputChange = (event) => {
+    console.log('Keep it up!')
     this.setState({input: event.target.value});
   }
-
+  
   onButtonSubmit = () => {
+    console.log('hi elvia. you made this work... finally!')
     this.setState({imageUrl: this.state.input});
-      fetch('https://mighty-tor-88895.herokuapp.com/imageurl', {
-        method: 'post',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          input: this.state.input
-        })
-      })
-      .then(response => response.json())
+    app.models.predict(
+      Clarifai.FACE_DETECT_MODEL, 
+      this.state.input)
       .then(response => {
+        console.log('hi, ', response, '!')
         if (response) {
-          fetch('https://mighty-tor-88895.herokuapp.com/image', {
+          fetch('http://localhost:3000/image', {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
               id: this.state.user.id
             })
           })
-            .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count}))
-            })
-            .catch(console.log)
-
+          .then(response => response.json())
+          .then(count => {
+            this.setState(Object.assign(this.state.user, {entries: count}))
+          })
+          .catch(console.log)
         }
         this.displayFaceBox(this.calculateFaceLocation(response))
       })
       .catch(err => console.log(err));
   }
+
+
 
   onRouteChange = (route) => {
     if (route === 'signout') {
